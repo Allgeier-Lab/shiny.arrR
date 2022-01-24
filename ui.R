@@ -123,16 +123,20 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
       ), 
     
       fluidRow(
-        column(width = 12, align = "center",
+        column(width = 6, align = "right",
           HTML("<br><br>"),  
           waiter::use_waiter(),
           
-          actionButton(inputId = "run", label = "Run model", icon = icon("running")),
+          actionButton(inputId = "run", label = "Run model", icon = icon("running"))
+        
+        ), 
+        
+        column(width = 6, align = "left",
                
           HTML("<br><br>"),
                
-          downloadButton("download", "Download results")
-               
+          downloadButton("download", "Download results"), 
+        
         )
       )
     ),

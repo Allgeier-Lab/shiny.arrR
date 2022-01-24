@@ -19,57 +19,68 @@ shinyServer(function(input, output) {
   r <- reactiveValues(data = NULL, plot = NULL)
   
   observeEvent(input$run, {
-    
-    showNotification(ui = "Starting simulation", type = "message")
-
-    waiter <- waiter::Waiter$new(id = "run")
-    waiter$show()
-    on.exit(waiter$hide())
-    
-    dim_int <- as.integer(stringr::str_split(input$dimensions, pattern = ",", simplify = TRUE))
-    grain_int <- as.integer(stringr::str_split(input$grain, pattern = ",", simplify = TRUE))
-    
-    starting_values <- arrR::read_parameters(file = input$starting$datapath)
-    parameters <- arrR::read_parameters(file = input$parameter$datapath)
-    
-    if (input$reef_x %in% c("NA", "NULL") || input$reef_y %in% c("NA", "NULL")) {
+  
+    if (is.null(input$starting) || is.null(input$parameter)) {
       
-      reef_matrix <- NULL
+      showNotification(ui = "Please provide .csv files", type = "error")
       
     } else {
+      
+      tryCatch(expr = {
     
-      reef_x <- as.integer(stringr::str_split(input$reef_x, pattern = ",", simplify = TRUE))
-      reef_y <- as.integer(stringr::str_split(input$reef_y, pattern = ",", simplify = TRUE))
-      
-      reef_matrix <- matrix(data = c(reef_x, reef_y), ncol = 2, byrow = FALSE)
-      
+        showNotification(ui = "Starting simulation...", type = "message")
+    
+        waiter <- waiter::Waiter$new(id = "run")
+        waiter$show()
+        on.exit(waiter$hide())
+        
+        dim_int <- as.integer(stringr::str_split(input$dimensions, pattern = ",", simplify = TRUE))
+        grain_int <- as.integer(stringr::str_split(input$grain, pattern = ",", simplify = TRUE))
+        
+        starting_values <- arrR::read_parameters(file = input$starting$datapath)
+        parameters <- arrR::read_parameters(file = input$parameter$datapath)
+        
+        if (input$reef_x %in% c("NA", "NULL") || input$reef_y %in% c("NA", "NULL")) {
+          
+          reef_matrix <- NULL
+          
+        } else {
+        
+          reef_x <- as.integer(stringr::str_split(input$reef_x, pattern = ",", simplify = TRUE))
+          reef_y <- as.integer(stringr::str_split(input$reef_y, pattern = ",", simplify = TRUE))
+          
+          reef_matrix <- matrix(data = c(reef_x, reef_y), ncol = 2, byrow = FALSE)
+          
+        }
+        
+        input_seafloor <- arrR::setup_seafloor(dimensions = dim_int, grain = grain_int,
+                                               reef = reef_matrix, starting_values = starting_values,
+                                               random = input$random, verbose = FALSE)
+        
+        input_fishpop <- arrR::setup_fishpop(seafloor = input_seafloor, starting_values = starting_values, 
+                                             parameters = parameters, verbose = FALSE)
+        
+        r$data <- arrR::run_simulation(seafloor = input_seafloor, fishpop = input_fishpop,
+                                       movement = input$movement, parameters = parameters,
+                                       max_i = input$max_i, min_per_i = input$min_per_i, seagrass_each = input$seagrass_each,
+                                       save_each = input$save_each, return_burnin = TRUE, nutrients_input = NULL,
+                                       verbose = FALSE)
+        
+        showNotification(ui = "...Finishing simulation", type = "message")},
+        error = function(e) {showNotification(ui = paste("Error:", e), type = "error")} ,
+        warning = function(w) {showNotification(ui = paste("Error:", w), type = "error")}
+      )
     }
-    
-    input_seafloor <- arrR::setup_seafloor(dimensions = dim_int, grain = grain_int,
-                                           reef = reef_matrix, starting_values = starting_values,
-                                           random = input$random, verbose = FALSE)
-    
-    input_fishpop <- arrR::setup_fishpop(seafloor = input_seafloor, starting_values = starting_values, 
-                                         parameters = parameters, verbose = FALSE)
-    
-    r$data <- arrR::run_simulation(seafloor = input_seafloor, fishpop = input_fishpop,
-                                   movement = input$movement, parameters = parameters,
-                                   max_i = input$max_i, min_per_i = input$min_per_i, seagrass_each = input$seagrass_each,
-                                   save_each = input$save_each, return_burnin = TRUE, nutrients_input = NULL,
-                                   verbose = FALSE)
-    
-    showNotification(ui = "Finishing simulation", type = "message")
-    
   })
   
   observeEvent(input$plot, { 
     
     if (is.null(r$data)) {
       showNotification(ui = "Run model first", type = "error")
-      return()
+      return(NULL)
     }
     
-    showNotification(ui = "Plotting result", type = "message")
+    showNotification(ui = "Plotting result...", type = "message")
     
     waiter <- waiter::Waiter$new(id = "plot")
     waiter$show()
@@ -77,17 +88,13 @@ shinyServer(function(input, output) {
     
     r$plot <- plot(r$data, what = input$what, summarize = input$summarize)
     
+    showNotification(ui = "...Result plotted", type = "message")
+    
   })
   
   output$console_result <- renderPrint({
     
-    # check if files were uploaded
-    validate(
-      need(expr = input$starting, message = "Please select 'Starting values' .csv file.\n"),
-      need(expr = input$parameter, message = "Please select 'Parameters' .csv file."),
-    )
-    
-    if (is.null(r$data)) {return("Please click 'Run model'!")}
+    if (is.null(r$data)) {return("...No model run simulated yet...")}
     print(r$data)
     
   })
@@ -99,7 +106,9 @@ shinyServer(function(input, output) {
     filename = function() {paste0("mdl-rn_", Sys.Date(), ".rds")},
 
     content = function(file) {
-      if (is.null(r$data)) showNotification(ui = "Run model first", type = "error")
+      if (is.null(r$data)) {showNotification(ui = "Downloading 'NULL'", type = "warning")}
+      if (!is.null(r$data)) {showNotification(ui = "Downloading model run", type = "message")}
       saveRDS(r$data, file)
     })
+  
 })
