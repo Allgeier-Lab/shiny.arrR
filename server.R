@@ -8,76 +8,85 @@
 #
 
 library(shiny)
-library(shinyjs)
+library(waiter)
 
 library(arrR)
 library(stringr)
-# library(terra)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
+  
+  r <- reactiveValues(data = NULL, plot = NULL)
+  
+  observeEvent(input$run, {
+    
+    showNotification(ui = "Starting simulation", type = "message")
 
-  model_run <- eventReactive(input$run, {
+    waiter <- waiter::Waiter$new(id = "run")
+    waiter$show()
+    on.exit(waiter$hide())
     
-    # check if files were uploaded
-    validate(
-      
-      need(expr = input$starting, message = "Please select starting values .CSV file."), 
-      
-      need(expr = input$parameter, message = "Please select parameters .CSV file."),
-      
-    )
+    dim_int <- as.integer(stringr::str_split(input$dimensions, pattern = ",", simplify = TRUE))
+    grain_int <- as.integer(stringr::str_split(input$grain, pattern = ",", simplify = TRUE))
     
-    withCallingHandlers(expr = {
-      
-      shinyjs::html("progress", "")
-      
-      message("...Starting the simulation at <", Sys.time(), ">... \n\n ...Please be patient... \n")
-      
-      dim_int <- as.integer(stringr::str_split(input$dimensions, pattern = ",", simplify = TRUE))
-      
-      grain_int <- as.integer(stringr::str_split(input$grain, pattern = ",", simplify = TRUE))
-      
-      starting_values <- arrR::read_parameters(file = input$starting$datapath)
-      
-      parameters <- arrR::read_parameters(file = input$parameter$datapath)
-      
-      input_seafloor <- arrR::setup_seafloor(dimensions = dim_int, grain = grain_int,
-                                             reef = NULL, starting_values = starting_values,
-                                             random = input$random, verbose = FALSE)
-      
-      input_fishpop <- arrR::setup_fishpop(seafloor = input_seafloor, starting_values = starting_values, 
-                                           parameters = parameters, verbose = FALSE)
-      
-      result_temp <- arrR::run_simulation(seafloor = input_seafloor, fishpop = input_fishpop,
-                                          movement = input$movement, parameters = parameters,
-                                          max_i = input$max_i, min_per_i = input$min_per_i, seagrass_each = input$seagrass_each,
-                                          save_each = input$save_each, return_burnin = TRUE, nutrients_input = NULL,
-                                          verbose = FALSE)
-      
-      message("...Finishing the simulation at <", Sys.time(), ">...")
-      
-      return(result_temp)
-      
-    }, message = function(m) {shinyjs::html(id = "progress", html = m$message, add = TRUE)})
+    starting_values <- arrR::read_parameters(file = input$starting$datapath)
+    parameters <- arrR::read_parameters(file = input$parameter$datapath)
+    
+    input_seafloor <- arrR::setup_seafloor(dimensions = dim_int, grain = grain_int,
+                                           reef = NULL, starting_values = starting_values,
+                                           random = input$random, verbose = FALSE)
+    
+    input_fishpop <- arrR::setup_fishpop(seafloor = input_seafloor, starting_values = starting_values, 
+                                         parameters = parameters, verbose = FALSE)
+    
+    r$data <- arrR::run_simulation(seafloor = input_seafloor, fishpop = input_fishpop,
+                                   movement = input$movement, parameters = parameters,
+                                   max_i = input$max_i, min_per_i = input$min_per_i, seagrass_each = input$seagrass_each,
+                                   save_each = input$save_each, return_burnin = TRUE, nutrients_input = NULL,
+                                   verbose = FALSE)
+    
+    showNotification(ui = "Finishing simulation", type = "message")
+    
+  })
+  
+  observeEvent(input$plot, { 
+    
+    if (is.null(r$data)) {
+      showNotification(ui = "Run model first", type = "error")
+      return()
+    }
+    
+    showNotification(ui = "Plotting result", type = "message")
+    
+    waiter <- waiter::Waiter$new(id = "plot")
+    waiter$show()
+    on.exit(waiter$hide())
+    
+    r$plot <- plot(r$data, what = input$what, summarize = input$summarize)
+    
   })
   
   output$console_result <- renderPrint({
     
-    print(model_run())
+    # check if files were uploaded
+    validate(
+      need(expr = input$starting, message = "Please select 'Starting values' .csv file.\n"),
+      need(expr = input$parameter, message = "Please select 'Parameters' .csv file."),
+    )
+    
+    if (is.null(r$data)) {return("Please click 'Run model'!")}
+    print(r$data)
     
   })
   
-  output$plot_result <- renderPlot({
-    
-    plot(model_run(), what = input$what, summarize = input$summarize)
-    
-  })
+  output$plot_result <- renderPlot({r$plot}, res = 96)
   
   output$download <- downloadHandler(
-    
+
     filename = function() {paste0("mdl-rn_", Sys.Date(), ".rds")},
 
-    content = function(file) {saveRDS(model_run(), file)})
-  
+    content = function(file) {
+      if (is.null(r$data)) showNotification(ui = "Run model first", type = "error")
+      saveRDS(r$data, file)
+    })
 })

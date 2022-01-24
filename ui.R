@@ -9,18 +9,16 @@
 
 library(shiny)
 library(shinythemes)
-library(shinyjs)
+library(waiter)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
-  
-  shinyjs::useShinyjs(),    
   
   # titlePanel(h3("Artifical Reefs in R", align = "center")), 
             
   HTML("<center><img src='logo.png' width='100'></center>"),
             
-  tabsetPanel(
+  tabsetPanel(selected = "Run model",
               
     tabPanel(title = "General background", 
              
@@ -59,14 +57,15 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
     ),
              
     tabPanel(title = "Run model",
-                      
+             
       fluidRow(
-                        
-        column(width = 6, align = "left",
-                               
+                      
+        column(width = 3, align = "left",
+                                 
           HTML("<br>"),
-                               
-          fileInput(inputId = "starting", label = "Starting values (semicolon separated)", accept = ".csv"),
+                                 
+          fileInput(inputId = "starting", label = "Starting values (semicolon separated)", 
+                    accept = ".csv"),
                                
           HTML("<br><br>"),
           
@@ -81,14 +80,15 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
           
           numericInput(inputId = "random", label = "Random", value = 0.0, 
                        min = 0, max = 1, step = 0.1),
-                               
-        ),
-                        
-        column(width = 6, align = "left",
-                               
+                                 
+          ),
+                          
+        column(width = 3, align = "left",
+                                 
           HTML("<br>"),  
-                               
-          fileInput(inputId = "parameter", label = "Parameters (semicolon separated)", accept = ".csv"),
+                                 
+          fileInput(inputId = "parameter", label = "Parameters (semicolon separated)", 
+                    accept = ".csv"),
           
           HTML("<br><br>"),     
           
@@ -103,35 +103,31 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
           
           selectInput(inputId = "movement", label = "Movement", choices = c("rand", "attr"), 
                       selected = "rand")
-                               
-        )
-      ), 
-                      
-      # adding some white space
-      HTML("<br><br>"),
-                        
-      fluidRow(
-                          
-        column(width = 2, align = "left",
                                  
-          actionButton(inputId = "run", label = "Run model", icon = icon("running")), 
+        ),
+          
+        column(width = 6, align = "left", 
           
           HTML("<br><br>"),
           
-          downloadButton("download", "Download results")
-                                 
-        ),
-                          
-        column(width = 4, align = "center",
-                                 
-          verbatimTextOutput("progress")
-                                 
-        ),
-                          
-        column(width = 6, align = "left",
-                                 
-          verbatimTextOutput("console_result")
-                                 
+          verbatimTextOutput("console_result")  
+            
+        )
+      ), 
+      
+      fluidRow(
+        
+        column(width = 12, align = "center",
+               
+               HTML("<br><br>"),  
+               waiter::use_waiter(),
+               
+               actionButton(inputId = "run", label = "Run model", icon = icon("running")),
+               
+               HTML("<br><br>"),
+               
+               downloadButton("download", "Download results")
+               
         )
       )
     ),
@@ -143,7 +139,11 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
         selectInput(inputId = "what", label = "What to plot", choices = c("seafloor", "fishpop"),
                     selected = "seafloor"), 
                              
-        checkboxInput(inputId = "summarize", label = "Summarize results", value = FALSE)
+        checkboxInput(inputId = "summarize", label = "Summarize results", value = FALSE), 
+        
+        HTML("<br><br>"),
+        
+        actionButton(inputId = "plot", label = "Plot results", icon = icon("brush"))
                              
       ), 
                       
