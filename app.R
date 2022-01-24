@@ -8,6 +8,8 @@
 #    https://rstudio.github.io/shinythemes/
 #
 
+# Check for console printing https://gist.github.com/jcheng5/3830244757f8ca25d4b00ce389ea41b3
+
 library(shiny)
 library(shinythemes)
 
@@ -120,18 +122,16 @@ ui <- fluidPage(theme = shinytheme(theme = "flatly"),
       fluidRow(
         
         column(width = 12, align = "center",
-               
-          checkboxInput(inputId = "verbose", label = "Verbose", value = TRUE),
-               
-          actionButton(inputId = "run", label = "Run model", icon = icon("running")),
-          
+              
+          actionButton(inputId = "run", label = "Run model", icon = icon("running"))
+        
         )
       )
     ),
     
     tabPanel(title = "Console Output",
 
-      verbatimTextOutput("console")
+      verbatimTextOutput("console_result")
 
     ),
     
@@ -150,12 +150,13 @@ ui <- fluidPage(theme = shinytheme(theme = "flatly"),
 
           HTML("<br>"),
 
-          checkboxInput(inputId = "summarize", label = "Summarize results", value = TRUE)
+          checkboxInput(inputId = "summarize", label = "Summarize results", value = FALSE)
 
         )
       ),
 
       fluidRow(
+        
         column(width = 12, align = "center",
 
           plotOutput("plot_result")
@@ -171,34 +172,39 @@ server <- function(input, output, session) {
   
   model_run <- eventReactive(input$run, {
     
+    # check if files were uploaded
+    validate(
+      
+      need(expr = input$starting, message = "Please select starting values .CSV file."), 
+      
+      need(expr = input$parameter, message = "Please select parameters .CSV file."),
+      
+    )
+    
     dim_int <- as.integer(stringr::str_split(input$dimensions, pattern = ",", simplify = TRUE))
     
     grain_int <- as.integer(stringr::str_split(input$grain, pattern = ",", simplify = TRUE))
     
     starting_values <- arrR::read_parameters(file = input$starting$datapath)
-    # starting_values <- arrR::arrR_starting_values
-    
+
     parameters <- arrR::read_parameters(file = input$parameter$datapath)
-    # parameters <- arrR::arrR_parameters
-    
+
     input_seafloor <- arrR::setup_seafloor(dimensions = dim_int, grain = grain_int,
                                            reef = NULL, starting_values = starting_values,
-                                           random = input$random, verbose = input$verbose)
+                                           random = input$random, verbose = TRUE)
     
     input_fishpop <- arrR::setup_fishpop(seafloor = input_seafloor, starting_values = starting_values, 
-                                         parameters = parameters, verbose = input$verbose)
+                                         parameters = parameters, verbose = TRUE)
     
     arrR::run_simulation(seafloor = input_seafloor, fishpop = input_fishpop, 
                          movement = input$movement, parameters = parameters, 
                          max_i = input$max_i, min_per_i = input$min_per_i, seagrass_each = input$seagrass_each,
                          save_each = input$save_each, return_burnin = TRUE, nutrients_input = NULL, 
-                         verbose = input$verbose)
+                         verbose = TRUE)
     
   })
-  
-  # output$progress <- renderText()
-  
-  output$console <- renderPrint({
+
+  output$console_result <- renderPrint({
     
     print(model_run())
   
@@ -209,7 +215,6 @@ server <- function(input, output, session) {
     plot(model_run(), what = input$what, summarize = input$summarize)
   
   })
-  
 }
 
 # Run the application 
