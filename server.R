@@ -32,8 +32,21 @@ shinyServer(function(input, output) {
     starting_values <- arrR::read_parameters(file = input$starting$datapath)
     parameters <- arrR::read_parameters(file = input$parameter$datapath)
     
+    if (input$reef_x %in% c("NA", "NULL") || input$reef_y %in% c("NA", "NULL")) {
+      
+      reef_matrix <- NULL
+      
+    } else {
+    
+      reef_x <- as.integer(stringr::str_split(input$reef_x, pattern = ",", simplify = TRUE))
+      reef_y <- as.integer(stringr::str_split(input$reef_y, pattern = ",", simplify = TRUE))
+      
+      reef_matrix <- matrix(data = c(reef_x, reef_y), ncol = 2, byrow = FALSE)
+      
+    }
+    
     input_seafloor <- arrR::setup_seafloor(dimensions = dim_int, grain = grain_int,
-                                           reef = NULL, starting_values = starting_values,
+                                           reef = reef_matrix, starting_values = starting_values,
                                            random = input$random, verbose = FALSE)
     
     input_fishpop <- arrR::setup_fishpop(seafloor = input_seafloor, starting_values = starting_values, 

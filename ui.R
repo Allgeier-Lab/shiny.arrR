@@ -19,9 +19,7 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
   HTML("<center><img src='logo.png' width='100'></center>"),
             
   tabsetPanel(selected = "Run model",
-              
     tabPanel(title = "General background", 
-             
       column(width = 12, align = "left",
         
         h3("Overview"),  
@@ -57,19 +55,29 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
     ),
              
     tabPanel(title = "Run model",
+      fluidRow(
+        column(width = 12, alias = "left", 
+          HTML("<br>"),
+          
+          HTML("Please use <span style='font-family:courier;'>?setup_seafloor()</span>, 
+               <span style='font-family:courier;'>?setup_fishpop()</span>, or 
+               <span style='font-family:courier;'>?run_simulation()</span> to get help
+               about model parameters.<br>")  
+              
+        )
+      ),       
              
       fluidRow(
-                      
         column(width = 3, align = "left",
-                                 
           HTML("<br>"),
                                  
           fileInput(inputId = "starting", label = "Starting values (semicolon separated)", 
                     accept = ".csv"),
                                
-          HTML("<br><br>"),
-          
           textInput(inputId = "dimensions", label = "Dimensions", value = "25,25",
+                    placeholder = "Enter values separated by a comma..."),
+          
+          textInput(inputId = "reef_x", label = "AR x coords", value = "-1,0,1,0,0",
                     placeholder = "Enter values separated by a comma..."),
           
           numericInput(inputId = "max_i", label = "Maximum iterations", value = 100, 
@@ -84,16 +92,16 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
           ),
                           
         column(width = 3, align = "left",
-                                 
           HTML("<br>"),  
                                  
           fileInput(inputId = "parameter", label = "Parameters (semicolon separated)", 
                     accept = ".csv"),
           
-          HTML("<br><br>"),     
-          
           textInput(inputId = "grain", label = "Grain", value = "1,1",
                     placeholder = "Enter values separated by a comma..."), 
+          
+          textInput(inputId = "reef_y", label = "AR y coords", value = "0,1,0,-1,0",
+                    placeholder = "Enter values separated by a comma..."),
           
           numericInput(inputId = "min_per_i", label = "Minutes per iteration", value = 120, 
                        min = 0, step = 5),
@@ -107,33 +115,29 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
         ),
           
         column(width = 6, align = "left", 
-          
           HTML("<br><br>"),
-          
+
           verbatimTextOutput("console_result")  
             
         )
       ), 
-      
+    
       fluidRow(
-        
         column(width = 12, align = "center",
+          HTML("<br><br>"),  
+          waiter::use_waiter(),
+          
+          actionButton(inputId = "run", label = "Run model", icon = icon("running")),
                
-               HTML("<br><br>"),  
-               waiter::use_waiter(),
+          HTML("<br><br>"),
                
-               actionButton(inputId = "run", label = "Run model", icon = icon("running")),
-               
-               HTML("<br><br>"),
-               
-               downloadButton("download", "Download results")
+          downloadButton("download", "Download results")
                
         )
       )
     ),
              
     tabPanel(title = "Visualise results",
-                      
       column(width = 2, align = "center",
                              
         selectInput(inputId = "what", label = "What to plot", choices = c("seafloor", "fishpop"),
