@@ -91,6 +91,8 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
           textInput(inputId = "reef_x", label = "AR x coords", value = "-1,0,1,0,0",
                     placeholder = "Enter values separated by a comma..."),
           
+          # MH: Rename in days and internally calculate to iterations?
+          
           numericInput(inputId = "max_i", label = "Maximum iterations", value = 100, 
                        min = 0, step = 1),
           
