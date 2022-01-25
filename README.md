@@ -8,7 +8,7 @@
 
 <!-- badges: end -->
 
-The goal of `shiny.arrR` is to provide a Shiny web app for the [*arrR*](https://allgeier-lab.github.io/arrR/) simulation model.
+The goal of `shiny.arrR` is to provide a Shiny web app for the [*arrR*](https://allgeier-lab.github.io/arrR/) simulation model. To run the app, use `shiny::runGitHub(repo = "Allgeier-Lab/shiny.arrR")`
 
 ## Citation
 
