@@ -16,6 +16,14 @@ library(stringr)
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
+  observeEvent(input$ref, {
+    showModal(ui = modalDialog("Esquivel, K.E., Hesselbarth, M.H.K., Allgeier, J.E. 
+                               Mechanistic support for increased primary production around 
+                               artificial reefs. Ecological Applications",
+                               title = "Citation information", size = "l",
+                               footer = modalButton("Close"), easyClose = TRUE))})
+  
+  
   r <- reactiveValues(data = NULL, plot = NULL)
   
   observeEvent(input$run, {

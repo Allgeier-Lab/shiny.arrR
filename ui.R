@@ -20,49 +20,60 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
             
   tabsetPanel(selected = "Run model",
     tabPanel(title = "General background", 
-      column(width = 12, align = "left",
+      fluidRow(
+        column(width = 12, align = "center", 
         
-        h3("Overview"),  
-                              
-        HTML("To get a BibTex entry, please use <span style='font-family:courier;'>citation('arrR')</span>. 
-             For more information, please see <a href='https://allgeier-lab.github.io/arrR'>https://allgeier-lab.github.io/arrR</a>.<br><br>
-             
-             The goal of <i>arrR</i> is to simulate seagrass primary production around 
-             artificial reefs (ARs) using an individual-based simulation model 
-             (IBM, DeAngelis and Grimm, 2014). The grid-based simulation environment 
-             (also referred to as seafloor) is populated by fish individuals all belonging 
-             to the same species. <br><br>
-             
-             Seagrass primary production is simulated using a single-nutrient primary 
-             of nutrients by fish individuals follows principles of bioenergetics 
-             production model adapted from DeAngelis (1992). Consumption and excretion 
-             (Schreck and Moyle, 1990). <br><br>
-             
-             <center><img src='concept.png' width='650'></center>"),
-             
-             h4("References"),
-             
-             HTML("DeAngelis, D.L., 1992. Dynamics of Nutrient Cycling and Food Webs. Springer 
-             Netherlands, Dordrecht. <https://doi.org/10.1007/978-94-011-2342-6><br> 
-             
-             DeAngelis, D.L., Grimm, V., 2014. Individual-based models in ecology after 
-             four decades. F1000Prime Reports 6, 1–6. <https://doi.org/10.12703/P6-39><br>
-             
-             Schreck, C.B., Moyle, P.B. (Eds.), 1990. Methods for fish biology. 
-             American Fisheries Society, Bethesda, MD, USA.")
-             
+          HTML("<br><br>"),
+          actionButton(inputId = "ref", label = "Show citation", icon = icon("book"))
+        
+        )
+      ),
+      
+      fluidRow(
+      
+        column(width = 12, align = "left",
+          
+          h3("Overview"),  
+                                
+          HTML("The goal of <i>arrR</i> is to simulate seagrass primary production around 
+               artificial reefs (ARs) using an individual-based simulation model 
+               (IBM, DeAngelis and Grimm, 2014). The grid-based simulation environment 
+               (also referred to as seafloor) is populated by fish individuals, currently all belonging 
+               to the same species. Seagrass primary production is simulated using a single-nutrient primary production 
+               model adapted from DeAngelis (1992). Consumption and excretion of nutrients 
+               by fish individuals follows principles of bioenergetics (Schreck and Moyle, 1990). <br><br>
+               
+               For more information, please see <a href='https://allgeier-lab.github.io/arrR'> https://allgeier-lab.github.io/arrR</a>.
+               
+               <center><figure>
+               <img src='concept.png' width='650' caption='xxx'>
+               <figcaption>Schematic overview of model concept (Adapted from DeAngelis 1992).</figcaption>
+               </figure></center>"),
+          
+          h4("References"),
+               
+          HTML("DeAngelis, D.L., 1992. Dynamics of Nutrient Cycling and Food Webs. Springer 
+               Netherlands, Dordrecht. <https://doi.org/10.1007/978-94-011-2342-6><br> 
+               
+               DeAngelis, D.L., Grimm, V., 2014. Individual-based models in ecology after 
+               four decades. F1000Prime Reports 6, 1–6. <https://doi.org/10.12703/P6-39><br>
+               
+               Schreck, C.B., Moyle, P.B. (Eds.), 1990. Methods for fish biology. 
+              American Fisheries Society, Bethesda, MD, USA.")
+               
+        )
       )
     ),
              
     tabPanel(title = "Run model",
       fluidRow(
-        column(width = 12, alias = "left", 
-          HTML("<br>"),
-          
-          HTML("Please use <span style='font-family:courier;'>?setup_seafloor()</span>, 
+        column(width = 6, align = "center", 
+      
+          HTML("<br><p style='border:3px; border-style:solid; border-color:#B1E1F1; 
+               padding: 0.5em;'>Please use <span style='font-family:courier;'>?setup_seafloor()</span>, 
                <span style='font-family:courier;'>?setup_fishpop()</span>, or 
-               <span style='font-family:courier;'>?run_simulation()</span> to get help
-               about model parameters.<br>")  
+               <span style='font-family:courier;'>?run_simulation()</span> in your 
+               <span style='font-family:courier;'>R</span> console for help.</p>")
               
         )
       ),       
