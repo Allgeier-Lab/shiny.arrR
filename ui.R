@@ -35,7 +35,7 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
           
           h3("Overview"),  
                                 
-          HTML("The goal of <i>arrR</i> is to simulate seagrass primary production around 
+          HTML("The goal of <b>arrR</b> is to simulate seagrass primary production around 
                artificial reefs (ARs) using an individual-based simulation model 
                (IBM, DeAngelis and Grimm, 2014). The grid-based simulation environment 
                (also referred to as seafloor) is populated by fish individuals, currently all belonging 
@@ -67,10 +67,10 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
              
     tabPanel(title = "Run model",
       fluidRow(
-        column(width = 6, align = "center", 
+        column(width = 12, align = "center", 
       
-          HTML("<br><p style='border:3px; border-style:solid; border-color:#B1E1F1; 
-               padding: 0.5em;'>Please use <span style='font-family:courier;'>?setup_seafloor()</span>, 
+          HTML("<br><p style='border:5px; border-style:solid; border-color:#B1E1F1; 
+               padding: 0.5em;'>Please type <span style='font-family:courier;'>?setup_seafloor()</span>, 
                <span style='font-family:courier;'>?setup_fishpop()</span>, or 
                <span style='font-family:courier;'>?run_simulation()</span> in your 
                <span style='font-family:courier;'>R</span> console for help.</p>")
@@ -93,13 +93,13 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
           
           # MH: Rename in days and internally calculate to iterations?
           
-          numericInput(inputId = "max_i", label = "Maximum iterations", value = 100, 
+          numericInput(inputId = "days", label = "Total simulation time (Days)", value = 30, 
                        min = 0, step = 1),
           
-          numericInput(inputId = "seagrass_each", label = "Run seagrass processes each iteration(s)", value = 1, 
+          numericInput(inputId = "seagrass_each", label = "Simulate seagrass processes each day(s)", value = 1, 
                        min = 0, step = 1),
           
-          numericInput(inputId = "random", label = "Random", value = 0.0, 
+          numericInput(inputId = "random", label = "Stochasticity starting values", value = 0.0, 
                        min = 0, max = 1, step = 0.1),
                                  
           ),
@@ -119,7 +119,7 @@ shinyUI(fluidPage(theme = shinythemes::shinytheme(theme = "flatly"),
           numericInput(inputId = "min_per_i", label = "Minutes per iteration", value = 120, 
                        min = 0, step = 5),
           
-          numericInput(inputId = "save_each", label = "Save results each iteration(s)", value = 1, 
+          numericInput(inputId = "save_each", label = "Save results each day(s)", value = 1, 
                        min = 0, step = 1),
           
           selectInput(inputId = "movement", label = "Movement", choices = c("rand", "attr"), 

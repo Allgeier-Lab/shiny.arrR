@@ -19,10 +19,9 @@ shinyServer(function(input, output) {
   observeEvent(input$ref, {
     showModal(ui = modalDialog("Esquivel, K.E., Hesselbarth, M.H.K., Allgeier, J.E. 
                                Mechanistic support for increased primary production around 
-                               artificial reefs. Ecological Applications",
+                               artificial reefs. In press. Ecological Applications",
                                title = "Citation information", size = "l",
                                footer = modalButton("Close"), easyClose = TRUE))})
-  
   
   r <- reactiveValues(data = NULL, plot = NULL)
   
@@ -36,47 +35,20 @@ shinyServer(function(input, output) {
       
       tryCatch(expr = {
     
-        showNotification(ui = "Starting simulation...", type = "message")
+        showNotification(ui = paste0("<", format(Sys.time(), "%X"), "> ...Starting..."), 
+                         type = "message")
     
         waiter <- waiter::Waiter$new(id = "run")
         waiter$show()
         on.exit(waiter$hide())
         
-        dim_int <- as.integer(stringr::str_split(input$dimensions, pattern = ",", simplify = TRUE))
-        grain_int <- as.integer(stringr::str_split(input$grain, pattern = ",", simplify = TRUE))
+        helper_mdlrn(input = input, r = r)
         
-        starting_values <- arrR::read_parameters(file = input$starting$datapath)
-        parameters <- arrR::read_parameters(file = input$parameter$datapath)
+        showNotification(ui = paste0("<", format(Sys.time(), "%X"), "> ...Finishing..."), 
+                         type = "message")
         
-        if (input$reef_x %in% c("NA", "NULL") || input$reef_y %in% c("NA", "NULL")) {
-          
-          reef_matrix <- NULL
-          
-        } else {
-        
-          reef_x <- as.integer(stringr::str_split(input$reef_x, pattern = ",", simplify = TRUE))
-          reef_y <- as.integer(stringr::str_split(input$reef_y, pattern = ",", simplify = TRUE))
-          
-          reef_matrix <- matrix(data = c(reef_x, reef_y), ncol = 2, byrow = FALSE)
-          
-        }
-        
-        input_seafloor <- arrR::setup_seafloor(dimensions = dim_int, grain = grain_int,
-                                               reef = reef_matrix, starting_values = starting_values,
-                                               random = input$random, verbose = FALSE)
-        
-        input_fishpop <- arrR::setup_fishpop(seafloor = input_seafloor, starting_values = starting_values, 
-                                             parameters = parameters, verbose = FALSE)
-        
-        r$data <- arrR::run_simulation(seafloor = input_seafloor, fishpop = input_fishpop,
-                                       movement = input$movement, parameters = parameters,
-                                       max_i = input$max_i, min_per_i = input$min_per_i, seagrass_each = input$seagrass_each,
-                                       save_each = input$save_each, return_burnin = TRUE, nutrients_input = NULL,
-                                       verbose = FALSE)
-        
-        showNotification(ui = "...Finishing simulation", type = "message")},
-        error = function(e) {showNotification(ui = paste("Error:", e), type = "error")} ,
-        warning = function(w) {showNotification(ui = paste("Error:", w), type = "error")}
+      }, error = function(e) {showNotification(ui = paste("Error:", e), type = "error")},
+         warning = function(w) {showNotification(ui = paste("Error:", w), type = "error")}
       )
     }
   })
