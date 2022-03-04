@@ -9,7 +9,7 @@
 
 The goal of `shiny.arrR` is to provide a Shiny web app for the [*arrR*](https://allgeier-lab.github.io/arrR/) simulation model. 
 
-To run the app, use `shiny::runGitHub(repo = "Allgeier-Lab/shiny.arrR")` or got to [mhkhesselbarth.shinyapps.io/arrr/](mhkhesselbarth.shinyapps.io/arrr/) for an online available deploy.
+To run the app, use `shiny::runGitHub(repo = "Allgeier-Lab/shiny.arrR")` or got to [https://mhkhesselbarth.shinyapps.io/arrR/](https://mhkhesselbarth.shinyapps.io/arrR/) for an online available deploy.
 
 ## Citation
 
